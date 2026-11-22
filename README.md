@@ -1,68 +1,87 @@
-# Tic Tac Toe Monorepo
+# tickytoe — Modern Next.js Tic Tac Toe Platform
 
-A production-ready, feature-rich, and aesthetically stunning online game and Chrome Extension built with TypeScript, React 19, Tailwind CSS, and Vite.
+A production-ready, feature-rich, accessible, and search-engine-optimized online Tic Tac Toe platform built with **Next.js (App Router)**, **React 19**, **Tailwind CSS**, and **TypeScript**.
 
 ## Architecture
 
 ```text
-├── packages/
-│   ├── core/                        # Zero-dependency, platform-agnostic TypeScript game & AI engine
-│   │   ├── src/
-│   │   │   ├── index.ts
-│   │   │   ├── types.ts
-│   │   │   ├── board.ts             # Dynamic combo generator (3x3, 4x4, 5x5)
-│   │   │   ├── ai.ts                # Minimax with Alpha-Beta pruning (Easy, Medium, Hard, Master)
-│   │   │   └── engine.ts            # State machine with undo/redo & history
-│   │   └── tests/
-│   │       └── core.test.ts         # Vitest unit tests (unbeatable AI verification)
-│   │
-│   ├── web/                         # Web Application (React 19 + Vite + Tailwind CSS)
-│   │   ├── public/
-│   │   │   ├── _redirects           # Netlify SPA redirect
-│   │   │   ├── robots.txt           # Googlebot crawling rules
-│   │   │   ├── sitemap.xml          # Canonical homepage sitemap
-│   │   │   ├── site.webmanifest     # PWA manifest
-│   │   │   ├── favicon.svg          # Scalable vector icon
-│   │   │   ├── favicon-48x48.png    # Critical Google Search SERP multiple
-│   │   │   └── favicon.ico          # Multi-size binary ICO (16, 32, 48)
-│   │   ├── src/
-│   │   │   ├── components/          # Glassmorphic UI, Sound, GameBoard, Modals
-│   │   │   ├── hooks/               # useAudio, useTheme, useConfetti
-│   │   │   ├── App.tsx              # Zero-dependency lightweight SPA router
-│   │   │   └── index.html           # Schema.org JSON-LD + Zero-FOUC <noscript> block
-│   │
-│   └── extension/                   # Manifest V3 Google Chrome Extension
-│       ├── public/
-│       │   ├── manifest.json
-│       │   └── icons/               # 16px, 48px, 128px
-│       └── src/
-│           ├── background/          # Context menus & streak badge sync
-│           └── popup/               # Toolbar mini-game
-│
+├── public/                          # Favicon suite, Web App Manifest, PWA icons
 ├── scripts/
 │   └── build-favicons.mjs           # Automated headless Chrome icon builder
-├── netlify.toml                     # Caching headers, SPA redirects, MIME types
-└── package.json                     # Monorepo workspaces root
+├── src/
+│   ├── app/                         # Next.js App Router
+│   │   ├── layout.tsx               # Root layout, Google Fonts, WebSite & Org Schema, Analytics
+│   │   ├── page.tsx                 # Root homepage hub (3x3 default, WebApplication & FAQ Schema)
+│   │   ├── robots.ts                # RFC-compliant dynamic robots.txt generator
+│   │   ├── sitemap.ts               # Dynamic XML sitemap generator
+│   │   ├── not-found.tsx            # Accessible custom 404 handler
+│   │   ├── play/
+│   │   │   └── [slug]/              # Static Site Generation (SSG) for individual game modes
+│   │   │       └── page.tsx         # Dynamic metadata, Breadcrumbs, and tactical guides
+│   │   └── privacy/                 # Privacy Policy & compliance disclosures
+│   │       └── page.tsx
+│   ├── components/                  # Glassmorphic UI, Sound, GameBoard, Modals
+│   │   ├── Cell.tsx                 # Accessible ARIA gridcell with keyboard navigation
+│   │   ├── Footer.tsx
+│   │   ├── GameBoard.tsx            # Multi-grid ARIA matrix (3x3, 4x4, 5x5)
+│   │   ├── GameClient.tsx           # Hydration-safe client workbench & mode ribbon
+│   │   ├── GameControls.tsx         # Touch-friendly mode, size, and AI difficulty controls
+│   │   ├── Header.tsx               # Sticky glassmorphic navbar with theme & sound toggles
+│   │   ├── NotFound.tsx
+│   │   ├── PrivacyClient.tsx
+│   │   ├── PrivacyPolicy.tsx
+│   │   ├── RulesSection.tsx         # Interactive strategy guide & accessible FAQ accordion
+│   │   ├── ScoreBoard.tsx           # Live region ARIA announcer, scores & blitz timer
+│   │   ├── SettingsModal.tsx        # Accessible dialog for themes, symbols, and audio
+│   │   └── StatsModal.tsx           # Accessible dialog for win tallies and streak history
+│   ├── core/                        # Zero-dependency TypeScript game & AI engine
+│   │   ├── index.ts
+│   │   ├── types.ts
+│   │   ├── board.ts                 # Dynamic combo generator (3x3, 4x4, 5x5)
+│   │   ├── ai.ts                    # Minimax with Alpha-Beta pruning (Easy, Medium, Hard, Master)
+│   │   └── engine.ts                # State machine with undo/redo & history
+│   ├── data/
+│   │   └── modes.ts                 # Centralized game modes & SEO registry
+│   ├── lib/
+│   │   └── seo.ts                   # Centralized metadata & Schema.org JSON-LD builders
+│   ├── hooks/                       # useAudio, useTheme, useConfetti
+│   ├── styles/                      # Tailwind directives and custom utility styles
+│   │   └── globals.css
+│   └── types.ts                     # Web settings and symbol display types
+├── tests/
+│   ├── core.test.ts                 # Vitest unit tests (AI engine verification)
+│   └── seo.test.ts                  # Vitest unit tests (SEO registry & schema validation)
+├── next.config.mjs                  # Next.js configuration & security headers
+├── tailwind.config.js               # Design tokens, neon glow shadows, animations
+├── tsconfig.json                    # Path aliases (@/*) and TypeScript configuration
+├── netlify.toml                     # Netlify Next.js deployment configuration
+└── package.json
 ```
 
 ## Features
 
-- **Multiple Grid Modes**: Classic 3x3 (3-in-a-row), Expanded 4x4 (4-in-a-row), and Epic 5x5 (4-in-a-row).
-- **Unbeatable Minimax AI**: Multi-tiered AI with mathematically proven Minimax and alpha-beta pruning.
-- **Synthesized Audio Engine**: Zero-asset sound effects generated with the Web Audio API.
+- **5 Dedicated Game Mode Routes**:
+  - `/` & `/play/3x3`: Classic 3x3 (3-in-a-row)
+  - `/play/4x4`: Tactical 4x4 (4-in-a-row)
+  - `/play/5x5`: Epic 5x5 (4-in-a-row Gomoku-style)
+  - `/play/2-player`: Local 2-Player pass-and-play
+  - `/play/ai`: Vs Unbeatable Minimax AI
+- **Unbeatable Minimax AI**: Multi-tiered AI with mathematically proven Minimax and Alpha-Beta pruning across 4 difficulty tiers.
+- **Synthesized Audio Engine**: Zero-asset procedural retro sound effects generated on-the-fly with the Web Audio API.
 - **Celebratory Confetti**: Lightweight canvas particle explosion upon victory.
 - **Turn Speed Timer**: Optional blitz timer (5s, 10s, 15s) with tick countdown sounds.
 - **Comprehensive Statistics**: Total matches, win rate, win streaks, and match history stored locally.
 - **Theme & Symbol Customization**: Dark/Light mode and Classic, Cyber Glow, or Emoji (⚔️ / 🛡️) symbols.
-- **Full Keyboard Accessibility**: Numpad and Arrow key support with instant keyboard shortcuts (`R` for reset, `U` for undo, `S` for stats, `M` for audio).
+- **Full WCAG 2.2 AA Accessibility**: ARIA grid matrix, live-region turn announcements, keyboard arrow navigation, and accessible modal dialogs.
 - **Offline & Private**: Zero tracking, zero telemetry, and 100% client-side privacy.
 
 ## Google Search SEO Architecture
 
-1. **Favicon Suite**: Meets all Googlebot requirements with multi-size `favicon.ico` (16, 32, 48) and `favicon-48x48.png` served at root with `image/x-icon` MIME type.
-2. **Schema.org JSON-LD**: Declares `WebSite`, `WebApplication`, and `FAQPage` with alternate brand names to eliminate third-party hosting branding.
-3. **Zero-FOUC `<noscript>` Block**: Server-side fallback content for search spiders without causing layout shifts or flashing UI for human visitors.
-4. **Privacy Policy Protection**: `/privacy` route contains `<meta name="robots" content="noindex, follow">`, preventing it from cannibalizing homepage search equity while passing authority back.
+1. **Dynamic Scalable Metadata**: Powered by a centralized registry ([src/data/modes.ts](file:///d:/Side%20Projects/tickytactoe/src/data/modes.ts)) generating unique titles, descriptions, canonical URLs, and OpenGraph/Twitter cards.
+2. **Schema.org Structured Data**: Valid JSON-LD implementing `WebSite`, `Organization`, `WebApplication`, `BreadcrumbList`, and `FAQPage`.
+3. **Dynamic XML Sitemap & Robots.txt**: Auto-generated via App Router route handlers ([src/app/sitemap.ts](file:///d:/Side%20Projects/tickytactoe/src/app/sitemap.ts) & [src/app/robots.ts](file:///d:/Side%20Projects/tickytactoe/src/app/robots.ts)).
+4. **Zero-FOUC `<noscript>` Block**: Pre-rendered semantic HTML fallback for search spiders.
+5. **Security Headers**: HSTS, CSP, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, and Permissions-Policy configured in [next.config.mjs](file:///d:/Side%20Projects/tickytactoe/next.config.mjs) and [netlify.toml](file:///d:/Side%20Projects/tickytactoe/netlify.toml).
 
 ## Commands
 
@@ -70,18 +89,18 @@ A production-ready, feature-rich, and aesthetically stunning online game and Chr
 # Install dependencies
 npm install
 
+# Run development server
+npm run dev
+
 # Run unit tests
 npm test
 
+# Build production bundle
+npm run build
+
+# Start production server
+npm start
+
 # Build favicons from favicon.svg
 npm run build:favicons
-
-# Develop Web Application locally
-npm run dev:web
-
-# Build Web Application for production
-npm run build:web
-
-# Build Chrome Extension
-npm run build:ext
 ```

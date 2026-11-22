@@ -8,12 +8,10 @@ const __dirname = path.dirname(__filename);
 const rootDir = path.resolve(__dirname, '..');
 
 const chromePath = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
-const svgPath = path.join(rootDir, 'packages/web/public/favicon.svg');
-const webPublic = path.join(rootDir, 'packages/web/public');
-const extIconsDir = path.join(rootDir, 'packages/extension/public/icons');
+const svgPath = path.join(rootDir, 'public/favicon.svg');
+const publicDir = path.join(rootDir, 'public');
 
-fs.mkdirSync(webPublic, { recursive: true });
-fs.mkdirSync(extIconsDir, { recursive: true });
+fs.mkdirSync(publicDir, { recursive: true });
 
 const sizes = [
   { name: 'favicon-16x16.png', size: 16 },
@@ -31,7 +29,7 @@ console.log('Building favicons and PWA icons from favicon.svg...');
 const tempHtmlPath = path.join(rootDir, 'temp_render.html');
 
 for (const { name, size } of sizes) {
-  const outputPath = path.join(webPublic, name);
+  const outputPath = path.join(publicDir, name);
   const htmlContent = `<!DOCTYPE html>
 <html>
 <head>
@@ -68,51 +66,6 @@ for (const { name, size } of sizes) {
   }
 }
 
-// Generate Chrome Extension icons
-const extSizes = [
-  { name: 'icon16.png', size: 16 },
-  { name: 'icon48.png', size: 48 },
-  { name: 'icon128.png', size: 128 },
-];
-
-for (const { name, size } of extSizes) {
-  const outputPath = path.join(extIconsDir, name);
-  const htmlContent = `<!DOCTYPE html>
-<html>
-<head>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body { width: ${size}px; height: ${size}px; background: transparent; overflow: hidden; }
-    img { width: 100%; height: 100%; display: block; }
-  </style>
-</head>
-<body>
-  <img src="file://${svgPath.replace(/\\/g, '/')}" />
-</body>
-</html>`;
-
-  fs.writeFileSync(tempHtmlPath, htmlContent);
-
-  try {
-    execFileSync(
-      chromePath,
-      [
-        '--headless=new',
-        '--disable-gpu',
-        '--hide-scrollbars',
-        '--default-background-color=00000000',
-        `--window-size=${size},${size}`,
-        `--screenshot=${outputPath}`,
-        `file://${tempHtmlPath.replace(/\\/g, '/')}`,
-      ],
-      { stdio: 'pipe' }
-    );
-    console.log(`Generated extension icon ${name} (${size}x${size})`);
-  } catch (err) {
-    console.error(`Error rendering ${name}:`, err.message);
-  }
-}
-
 // Clean up temp file
 if (fs.existsSync(tempHtmlPath)) {
   fs.unlinkSync(tempHtmlPath);
@@ -134,7 +87,6 @@ function createIcoFromPngs(pngPaths, outputPath) {
 
   for (let i = 0; i < count; i++) {
     const buf = pngBuffers[i];
-    // Read PNG width & height (bytes 16-24 of PNG header)
     const width = buf.readUInt32BE(16);
     const height = buf.readUInt32BE(20);
 
@@ -158,13 +110,13 @@ function createIcoFromPngs(pngPaths, outputPath) {
 }
 
 const icoSources = [
-  path.join(webPublic, 'favicon-16x16.png'),
-  path.join(webPublic, 'favicon-32x32.png'),
-  path.join(webPublic, 'favicon-48x48.png'),
+  path.join(publicDir, 'favicon-16x16.png'),
+  path.join(publicDir, 'favicon-32x32.png'),
+  path.join(publicDir, 'favicon-48x48.png'),
 ];
 
 if (icoSources.every((p) => fs.existsSync(p))) {
-  createIcoFromPngs(icoSources, path.join(webPublic, 'favicon.ico'));
+  createIcoFromPngs(icoSources, path.join(publicDir, 'favicon.ico'));
 }
 
 console.log('Favicon generation completed successfully.');
